@@ -1,4 +1,7 @@
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
+using UnityEngine.InputSystem;
+#endif
 
 namespace CrystalQuest
 {
@@ -50,7 +53,7 @@ namespace CrystalQuest
 
         private void ReadInput()
         {
-            var input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+            Vector2 input = ReadMovementInput();
             Vector3 direction = new Vector3(input.x, 0f, input.y);
 
             if (direction.sqrMagnitude > 1f)
@@ -76,11 +79,120 @@ namespace CrystalQuest
                 var lookRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, turnSpeed * Time.deltaTime);
             }
-
-            if (Input.GetButtonDown("Jump"))
+            if (ReadJumpInput())
             {
                 jumpBuffered = true;
             }
+        }
+
+        private Vector2 ReadMovementInput()
+        {
+            Vector2 input = Vector2.zero;
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+
+            if (input == Vector2.zero)
+            {
+                float x = 0f;
+                float y = 0f;
+
+                if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+                {
+                    x -= 1f;
+                }
+
+                if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+                {
+                    x += 1f;
+                }
+
+                if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+                {
+                    y -= 1f;
+                }
+
+                if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+                {
+                    y += 1f;
+                }
+
+                input = new Vector2(x, y);
+            }
+#endif
+
+#if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
+            if (input == Vector2.zero)
+            {
+                if (Keyboard.current != null)
+                {
+                    float x = 0f;
+                    float y = 0f;
+
+                    if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)
+                    {
+                        x -= 1f;
+                    }
+
+                    if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
+                    {
+                        x += 1f;
+                    }
+
+                    if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)
+                    {
+                        y -= 1f;
+                    }
+
+                    if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)
+                    {
+                        y += 1f;
+                    }
+
+                    input = new Vector2(x, y);
+                }
+
+                if (Gamepad.current != null)
+                {
+                    Vector2 stick = Gamepad.current.leftStick.ReadValue();
+                    if (stick.sqrMagnitude > input.sqrMagnitude)
+                    {
+                        input = stick;
+                    }
+                }
+            }
+#endif
+
+            if (input.sqrMagnitude > 1f)
+            {
+                input.Normalize();
+            }
+
+            return input;
+        }
+
+        private bool ReadJumpInput()
+        {
+            bool jumpPressed = false;
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            jumpPressed |= Input.GetButtonDown("Jump");
+            jumpPressed |= Input.GetKeyDown(KeyCode.Space);
+#endif
+
+#if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
+            if (Keyboard.current != null)
+            {
+                jumpPressed |= Keyboard.current.spaceKey.wasPressedThisFrame;
+            }
+
+            if (Gamepad.current != null)
+            {
+                jumpPressed |= Gamepad.current.buttonSouth.wasPressedThisFrame;
+            }
+#endif
+
+            return jumpPressed;
         }
 
         private void ApplyGravity()

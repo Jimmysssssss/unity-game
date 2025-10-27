@@ -155,7 +155,7 @@ namespace CrystalQuest
             canvasObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             canvasObject.AddComponent<GraphicRaycaster>();
 
-            if (FindObjectOfType<EventSystem>() == null)
+            if (EventSystem.current == null)
             {
                 var eventSystem = new GameObject("EventSystem");
                 eventSystem.AddComponent<EventSystem>();
@@ -185,7 +185,7 @@ namespace CrystalQuest
             rectTransform.sizeDelta = new Vector2(600f, 80f);
 
             var text = textObject.AddComponent<Text>();
-            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             text.color = Color.white;
             text.supportRichText = true;
 
