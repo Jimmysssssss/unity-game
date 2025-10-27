@@ -91,6 +91,34 @@ namespace CrystalQuest
 
 #if ENABLE_LEGACY_INPUT_MANAGER
             input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+
+            if (input == Vector2.zero)
+            {
+                float x = 0f;
+                float y = 0f;
+
+                if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+                {
+                    x -= 1f;
+                }
+
+                if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+                {
+                    x += 1f;
+                }
+
+                if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+                {
+                    y -= 1f;
+                }
+
+                if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+                {
+                    y += 1f;
+                }
+
+                input = new Vector2(x, y);
+            }
 #endif
 
 #if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
@@ -149,6 +177,7 @@ namespace CrystalQuest
 
 #if ENABLE_LEGACY_INPUT_MANAGER
             jumpPressed |= Input.GetButtonDown("Jump");
+            jumpPressed |= Input.GetKeyDown(KeyCode.Space);
 #endif
 
 #if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
